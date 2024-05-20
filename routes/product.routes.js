@@ -71,7 +71,7 @@ router.delete("/products/:productId", (req, res, next) => {
   Product.findByIdandRemove(productId)
     .then(() =>
       res.json({
-        message: `Project with ${productId} is removed successfully.`,
+        message: `Product with ${productId} is removed successfully.`,
       })
     )
     .catch((err) => {
