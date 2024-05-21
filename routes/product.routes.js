@@ -51,7 +51,7 @@ router.put("/products/:productId", (req, res, next) => {
     return;
   }
 
-  Product.findByIdandUpdate(productId, req.body, { new: true })
+  Product.findByIdAndUpdate(productId, req.body, { new: true })
     .then((updatedProduct) => res.json(updatedProduct))
     .catch((err) => {
       console.log("Error while updating the product", err);
@@ -68,7 +68,7 @@ router.delete("/products/:productId", (req, res, next) => {
     return;
   }
 
-  Product.findByIdandRemove(productId)
+  Product.findByIdAndDelete(productId)
     .then(() =>
       res.json({
         message: `Product with ${productId} is removed successfully.`,
