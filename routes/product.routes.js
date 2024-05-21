@@ -10,7 +10,7 @@ router.post("/products", (req, res, next) => {
   Product.create({ title, description, price })
     .then((response) => res.json(response))
     .catch((err) => {
-      console.log("error creating project", err);
+      console.log("error creating product", err);
       res.status(500).json({ message: "Error while creating the product" });
     });
 });
@@ -18,9 +18,9 @@ router.post("/products", (req, res, next) => {
 // GET - All products
 router.get("/products", (req, res, next) => {
   Product.find()
-    .then((allProjects) => res.json(allProjects))
+    .then((allProducts) => res.json(allProducts))
     .catch((err) => {
-      console.log("error creating project", err);
+      console.log("error creating product", err);
       res.status(500).json({ message: "Error while getting the products" });
     });
 });
@@ -37,8 +37,8 @@ router.get("/products/:productId", (req, res, next) => {
   Product.findById(productId)
     .then((product) => res.status(200).json(product))
     .catch((err) => {
-      console.log("Error while retrieving the project", err);
-      res.status(500).json({ message: "Error while retrieving the project" });
+      console.log("Error while retrieving the product", err);
+      res.status(500).json({ message: "Error while retrieving the product" });
     });
 });
 
@@ -59,7 +59,7 @@ router.put("/products/:productId", (req, res, next) => {
     });
 });
 
-// DELETE - Delete one project
+// DELETE - Delete one product
 router.delete("/products/:productId", (req, res, next) => {
   const { productId } = req.params;
 
@@ -75,8 +75,8 @@ router.delete("/products/:productId", (req, res, next) => {
       })
     )
     .catch((err) => {
-      console.log("Error while deleting the project", err);
-      res.status(500).json({ message: "Error while deleting the project" });
+      console.log("Error while deleting the product", err);
+      res.status(500).json({ message: "Error while deleting the product" });
     });
 });
 
