@@ -1,32 +1,56 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-
+const fileUploader = require('../config/cloudinary.config');
 const Product = require("../models/Product.model");
 
 // POST - Create new product
-router.post("/products", async (req, res, next) => {
-  try {
-    const { title, description, price } = req.body;
+router.post(
+  "/products",
+  fileUploader.single("imageUrl"),
+  async (req, res, next) => {
+    try {
+      const { title, description, price, category } = req.body;
 
-    if (!title || !description || !price) {
-      return res
-        .status(400)
-        .json({ message: "Title, description and price are required" });
-    }
-    const newProduct = await Product.create({ title, description, price });
+      if (!title || !description || !price || !category) {
+        return res.status(400).json({
+          message: "Title, description, price and category are required.",
+        });
+      }
 
-    res.status(201).json(newProduct);
-  } catch (error) {
-    console.error("error creating product", error);
-    if (error instanceof mongoose.Error.ValidationError) {
-      return res
-        .status(400)
-        .json({ message: "Invalid data from product creation", error });
+      const numericPrice = parseFloat(price);
+      if (isNaN(numericPrice)) {
+        return res
+          .status(400)
+          .json({ message: "Price must be a valid number" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Product image is required" });
+      }
+
+      const newProduct = await Product.create({
+        title,
+        description,
+        price: numericPrice,
+        category,
+        imageUrl: req.file.path,
+      });
+
+      res.status(201).json(newProduct);
+    } catch (error) {
+      console.log("Error creating product", error);
+
+      if (error instanceof mongoose.Error.ValidationError) {
+        return res.status(400).json({
+          message: "Invalid data for prodcut creation",
+          error: error.errors,
+        });
+      }
+      res.status(500).json({ message: "Internal server error" });
     }
-    res.status(500).json({ message: "Internal server error" });
   }
-});
+);
 
 // GET - All products
 router.get("/products", async (req, res, next) => {
@@ -67,10 +91,30 @@ router.put("/products/:productId", async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({ message: "Specified id is not valid" });
     }
+
+    const { title, description, price, category, imageUrl } = req.body;
+
+    if (
+      price !== undefined &&
+      (isNaN(parseFloat(price)) || parseFloat(price) < 0)
+    ) {
+      return res
+        .status(400)
+        .json({
+          message: "Price must be a valid number and cannot be less than 0.",
+        });
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
-      req.body,
-      { new: true }
+      {
+        ...(title && { title }),
+        ...(description && { description }),
+        ...(price !== undefined && { price: parseFloat(price) }),
+        ...(category && { category }),
+        ...(imageUrl && { imageUrl }),
+      },
+      { new: true, runValidators: true }
     );
 
     if (!updatedProduct) {
